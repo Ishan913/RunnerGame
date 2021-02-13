@@ -1,22 +1,29 @@
 let alien;
-let obs;
 let backImg;
 let alienImg;
 let obsImg;
 let obstacles = [];
 let obsArr = [];
-let alienArr=[];
-let alb = [];
+let alienArr = [];
+let x1 = 0;
+let x2;
+let soundClassifier;
+let start=0;
 
 
 function preload() {
-  backImg = loadImage('images/back.jpg');
+  const options = { probabilityThreshold: 0.80 };
+  soundClassifier = ml5.soundClassifier('SpeechCommands18w')
+  backImg = loadImage('images/back1.jpg');
+  backImg2=loadImage('images/back2.jpg')
   alienImg = loadImage('images/alien-8.png');
   obsImg = loadImage('images/obstacle-8.png')
 }
 
 function setup() {
-  let canvas = createCanvas(1500, 700);
+  createCanvas(1500, 700);
+  soundClassifier.classify(gotCommand);
+  x2 = height*3.33;
   alien = new Alien();
   obs = new Obstacle();
   obsArr[0] = createVector(-3.399993896484375, 53)
@@ -45,76 +52,102 @@ function setup() {
   obsArr[23] = createVector(6.600006103515625, 71)
   obsArr[24] = createVector(-2.399993896484375, 62)
 
-  alienArr[0]=createVector(127 , 19)
-  alienArr[1]=createVector(133 , 28)
-  alienArr[2]=createVector(134 , 44)
-  alienArr[3]=createVector(152 , 48)
-  alienArr[4]=createVector(164 , 57)
-  alienArr[5]=createVector(167 , 66)
-  alienArr[6]=createVector(164 , 73)
-  alienArr[7]=createVector(157 , 78)
-  alienArr[8]=createVector(153 , 86)
-  alienArr[9]= createVector(145 , 92)
-  alienArr[10]=createVector(135 , 94)
-  alienArr[11]=createVector(121 , 88)
-  alienArr[12]=createVector(111 , 89)
-  alienArr[13]=createVector(100 , 89)
-  alienArr[14]=createVector(95 , 96)
-  alienArr[15]=createVector(82 , 100)
-  alienArr[16]=createVector(71 , 98)
-  alienArr[17]=createVector(65 , 92)
-  alienArr[18]=createVector(62 , 89)
-  alienArr[19]=createVector(45 , 89)
-  alienArr[20]=createVector(35 , 96)
-  alienArr[21]=createVector(17 , 95)
-  alienArr[22]=createVector(10 , 82)
-  alienArr[23]=createVector(-3 , 73)
-  alienArr[24]=createVector(-5 , 65)
-  alienArr[25]=createVector(-2 , 59)
-  alienArr[26]=createVector(9 , 52)
-  alienArr[27]=createVector(28 , 41)
-  alienArr[28]=createVector(34 , 19)
-  alienArr[29]=createVector(43 , 9)
-  alienArr[30]=createVector(52 , 1)
-  alienArr[31]=createVector(60 , -3)
+  alienArr[0] = createVector(127, 19)
+  alienArr[1] = createVector(133, 28)
+  alienArr[2] = createVector(134, 44)
+  alienArr[3] = createVector(152, 48)
+  alienArr[4] = createVector(164, 57)
+  alienArr[5] = createVector(167, 66)
+  alienArr[6] = createVector(164, 73)
+  alienArr[7] = createVector(157, 78)
+  alienArr[8] = createVector(153, 86)
+  alienArr[9] = createVector(145, 92)
+  alienArr[10] = createVector(135, 94)
+  alienArr[11] = createVector(121, 88)
+  alienArr[12] = createVector(111, 89)
+  alienArr[13] = createVector(100, 89)
+  alienArr[14] = createVector(95, 96)
+  alienArr[15] = createVector(82, 100)
+  alienArr[16] = createVector(71, 98)
+  alienArr[17] = createVector(65, 92)
+  alienArr[18] = createVector(62, 89)
+  alienArr[19] = createVector(45, 89)
+  alienArr[20] = createVector(35, 96)
+  alienArr[21] = createVector(17, 95)
+  alienArr[22] = createVector(10, 82)
+  alienArr[23] = createVector(-3, 73)
+  alienArr[24] = createVector(-5, 65)
+  alienArr[25] = createVector(-2, 59)
+  alienArr[26] = createVector(9, 52)
+  alienArr[27] = createVector(28, 41)
+  alienArr[28] = createVector(34, 19)
+  alienArr[29] = createVector(43, 9)
+  alienArr[30] = createVector(52, 1)
+  alienArr[31] = createVector(60, -3)
+}
 
-  
-
+function gotCommand(error,results){
+  if(error){
+    console.error(error);
+  }
+  console.log(results[0].label,results[0].confidence);
+  if (results[0].label =='up'){
+    console.log("jumping")
+    alien.jump(); 
+  }
 }
 
 function keyPressed() {
   if (key == ' ') {
     alien.jump();
-
   }
-}
-
-function mousePressed() {
-  // console.log("a+"+(mouseX-alien.x)+" "+"b+"+(mouseY-alien.y));
-  // console.log("shape.point("+(mouseX-obs.x)+" , "+(mouseY-obs.y)+")")
 }
 
 function draw() {
-  if (random(1) < 0.1) {
-    if (obstacles.length == 0) {
+  image(backImg, x1, 0, height*3.33, height)
+  image(backImg2, x2, 0, height*3.33, height)
+  x1 -= 4;
+  x2 -= 4;
+  if (x1 < -height*3.33) {
+    x1 = height*3.33
+  }
+  if (x2 < -height*3.33) {
+    x2 = height*3.33;
+  }
+
+  if (obstacles.length == 0){
+    if (random(1) < 0.02){
       obstacles.push(new Obstacle());
     }
-    else if (obstacles[obstacles.length - 1].x < 500) {
-      obstacles.push(new Obstacle());
+  }else{
+    if (random(1) < 0.1) {
+      if (obstacles[obstacles.length - 1].x < 500) {
+        obstacles.push(new Obstacle());
+      }
     }
   }
-  background(backImg);
+
+  // if (random(1) < 0.1) {
+  //   if (obstacles.length == 0) {
+  //     obstacles.push(new Obstacle());
+  //   }
+  //   else if (obstacles[obstacles.length - 1].x < 500) {
+  //     obstacles.push(new Obstacle());
+  //   }
+  // }
   for (let o of obstacles) {
     o.show();
     o.move();
-    if (o.x<300){
-      if (alien.hit(alienArr,obsArr,o)) {
+    if (o.x < 300) {
+      if (alien.hit(alienArr, obsArr, o)) {
         console.log("Game Over");
         noLoop();
+      }
+      if (o.x < -200) {
+        obstacels = obstacles.slice(obstacles.indexOf(o),);
+      }
     }
   }
-  }
-  // obs.show();
   alien.show();
   alien.move();
 }
